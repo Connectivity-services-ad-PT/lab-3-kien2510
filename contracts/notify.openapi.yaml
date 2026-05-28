@@ -18,6 +18,7 @@ tags:
 paths:
   /health:
     get:
+      operationId: getHealth
       tags: [health]
       summary: Kiểm tra sức khỏe service
       description: Trả về trạng thái hoạt động của Notification Service
@@ -35,9 +36,10 @@ paths:
 
   /api/notifications:
     post:
+      operationId: sendNotification
       tags: [notifications]
       summary: Gửi thông báo mới
-      description: Tạo và gửi thông báo đến người dùng
+      description: Tạo và gửi thông báo đến người dùng qua nhiều kênh
       requestBody:
         required: true
         content:
@@ -59,7 +61,7 @@ paths:
                   default: normal
       responses:
         '201':
-          description: Thông báo đã được gửi
+          description: Thông báo đã được gửi thành công
           content:
             application/json:
               schema:
