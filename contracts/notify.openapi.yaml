@@ -4,6 +4,9 @@ info:
   title: A7 - Notification Service
   version: 1.0.0
   description: Notification Service for Smart Campus
+  contact:
+    name: A7 Team
+    email: a7@example.com
 
 servers:
   - url: http://localhost:8007
@@ -13,6 +16,9 @@ paths:
     get:
       operationId: getHealth
       summary: Health check
+      tags:
+        - health
+      description: Returns the health status of the Notification Service
       responses:
         '200':
           description: OK
@@ -21,13 +27,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: 
+                  status:
                     type: string
 
   /api/notifications:
     post:
       operationId: sendNotification
       summary: Send a notification
+      tags:
+        - notifications
+      description: Sends a notification to a user via the specified channel
       requestBody:
         required: true
         content:
@@ -39,7 +48,7 @@ paths:
                 user_id: { type: string }
                 title: { type: string }
                 message: { type: string }
-                channel: 
+                channel:
                   type: string
                   enum: [inapp, push, email, sms]
       responses:
