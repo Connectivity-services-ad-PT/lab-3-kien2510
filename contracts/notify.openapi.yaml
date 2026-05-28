@@ -1,324 +1,70 @@
 openapi: 3.1.0
+
 info:
-  title: API Gateway & Notification Service - Nhóm 7A (productA) [Lab 02]
+  title: A7 - Notification Service (Product A)
   version: 1.0.0
-  description: |
-    ### TÀI LIỆU HỢP ĐỒNG THIẾT KẾ API (API CONTRACT) - BÀI TẬP PHÁT TRIỂN LAB 02
+  description: Dịch vụ gửi thông báo và cảnh báo đa kênh cho Smart Campus Ecosystem
   contact:
     name: Nguyễn Trung Kiên
     email: kien.nt.7a@example.edu.vn
+
 servers:
-  - url: http://localhost:4010
-  - url: https://api.campus.local
+  - url: http://localhost:8007
 
 tags:
   - name: health
-  - name: alerts
-  - name: events
-
-security:
-  - bearerAuth: []
+  - name: notifications
 
 paths:
   /health:
     get:
-      operationId: getHealth
       tags: [health]
-      security: []
+      summary: Kiểm tra sức khỏe service
+      description: Trả về trạng thái hoạt động của Notification Service
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                type: object
+                properties:
+                  status: { type: string }
+                  service: { type: string }
+                  version: { type: string }
 
-  /alerts:
+  /api/notifications:
     post:
-      operationId: createAlert
-      tags: [alerts]
+      tags: [notifications]
+      summary: Gửi thông báo mới
+      description: Tạo và gửi thông báo đến người dùng
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAlertRequest'
+              type: object
+              required: [user_id, title, message]
+              properties:
+                user_id: { type: string }
+                title: { type: string }
+                message: { type: string }
+                channel: 
+                  type: string
+                  enum: [inapp, push, email, sms]
+                  default: inapp
+                priority:
+                  type: string
+                  enum: [low, normal, high]
+                  default: normal
       responses:
         '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Alert'
-        '400':
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-    get:
-      operationId: listAlerts
-      tags: [alerts]
-      parameters:
-        - $ref: '#/components/parameters/Cursor'
-        - $ref: '#/components/parameters/Limit'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlertPage'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-  /alerts/recent:
-    get:
-      operationId: getRecentAlerts
-      tags: [alerts]
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Success
+          description: Thông báo đã được gửi
           content:
             application/json:
               schema:
                 type: object
-                required: [items]
                 properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Alert'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-  /alerts/{alertId}:
-    get:
-      operationId: getAlertById
-      tags: [alerts]
-      parameters:
-        - $ref: '#/components/parameters/AlertId'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Alert'
-        '404':
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-  /events:
-    post:
-      operationId: createCampusEvent
-      tags: [events]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CampusEvent'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventAccepted'
-        '400':
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        '401':
-          description: Unauthorized
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-  parameters:
-    AlertId:
-      name: alertId
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Cursor:
-      name: cursor
-      in: query
-      schema:
-        type: [string, "null"]
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        default: 20
-
-  schemas:
-    HealthStatus:
-      type: object
-      required: [status, service, time]
-      properties:
-        status:
-          type: string
-        service:
-          type: string
-        time:
-          type: string
-          format: date-time
-
-    CreateAlertRequest:
-      type: object
-      required: [sourceService, alertType, severity, message]
-      properties:
-        sourceService:
-          type: string
-        alertType:
-          type: string
-        severity:
-          type: string
-        message:
-          type: string
-        relatedEventId:
-          type: [string, "null"]
-          format: uuid
-
-    Alert:
-      allOf:
-        - $ref: '#/components/schemas/CreateAlertRequest'
-        - type: object
-          required: [id, status, createdAt]
-          properties:
-            id:
-              type: string
-              format: uuid
-            status:
-              type: string
-            createdAt:
-              type: string
-              format: date-time
-            resolvedAt:
-              type: [string, "null"]
-              format: date-time
-
-    AlertPage:
-      type: object
-      required: [items, nextCursor, hasMore]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Alert'
-        nextCursor:
-          type: [string, "null"]
-        hasMore:
-          type: boolean
-
-    CampusEvent:
-      type: object
-      required: [eventType, severity]
-      properties:
-        eventType:
-          type: string
-        severity:
-          oneOf:
-            - $ref: '#/components/schemas/SeverityHigh'
-            - $ref: '#/components/schemas/SeverityLow'
-          discriminator:
-            propertyName: level
-            mapping:
-              high: '#/components/schemas/SeverityHigh'
-              low: '#/components/schemas/SeverityLow'
-        metadata:
-          type: [string, "null"]
-
-    SeverityHigh:
-      type: object
-      required: [level, escalate]
-      properties:
-        level:
-          type: string
-          enum: [high]
-        escalate:
-          type: boolean
-
-    SeverityLow:
-      type: object
-      required: [level]
-      properties:
-        level:
-          type: string
-          enum: [low]
-
-    EventAccepted:
-      type: object
-      required: [eventId, acceptedAt]
-      properties:
-        eventId:
-          type: string
-          format: uuid
-        acceptedAt:
-          type: string
-          format: date-time
-
-    Problem:
-      type: object
-      required: [type, title, status]
-      properties:
-        type:
-          type: string
-          format: uri
-        title:
-          type: string
-        status:
-          type: integer
-        detail:
-          type: [string, "null"]
-        instance:
-          type: [string, "null"]
-          format: uri
-        errors:
-          type: array
-          items:
-            type: object
+                  notification_id: { type: string }
+                  status: { type: string }
+                  sent_at: { type: string, format: date-time }
