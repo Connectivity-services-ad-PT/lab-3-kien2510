@@ -1,27 +1,18 @@
 openapi: 3.1.0
 
 info:
-  title: A7 - Notification Service (Product A)
+  title: A7 - Notification Service
   version: 1.0.0
-  description: Dịch vụ gửi thông báo và cảnh báo đa kênh cho Smart Campus Ecosystem
-  contact:
-    name: Nguyễn Trung Kiên
-    email: kien.nt.7a@example.edu.vn
+  description: Notification Service for Smart Campus
 
 servers:
   - url: http://localhost:8007
-
-tags:
-  - name: health
-  - name: notifications
 
 paths:
   /health:
     get:
       operationId: getHealth
-      tags: [health]
-      summary: Kiểm tra sức khỏe service
-      description: Trả về trạng thái hoạt động của Notification Service
+      summary: Health check
       responses:
         '200':
           description: OK
@@ -30,16 +21,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: { type: string }
-                  service: { type: string }
-                  version: { type: string }
+                  status: 
+                    type: string
 
   /api/notifications:
     post:
       operationId: sendNotification
-      tags: [notifications]
-      summary: Gửi thông báo mới
-      description: Tạo và gửi thông báo đến người dùng qua nhiều kênh
+      summary: Send a notification
       requestBody:
         required: true
         content:
@@ -54,14 +42,9 @@ paths:
                 channel: 
                   type: string
                   enum: [inapp, push, email, sms]
-                  default: inapp
-                priority:
-                  type: string
-                  enum: [low, normal, high]
-                  default: normal
       responses:
         '201':
-          description: Thông báo đã được gửi thành công
+          description: Created
           content:
             application/json:
               schema:
@@ -69,4 +52,3 @@ paths:
                 properties:
                   notification_id: { type: string }
                   status: { type: string }
-                  sent_at: { type: string, format: date-time }
