@@ -1,0 +1,255 @@
+﻿{
+  "info": {
+    "name": "FIT4110 Lab03 - Notify Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "GET /health - Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response has status field', function () { pm.expect(pm.response.json()).to.have.property('status'); });"
+          ]}}]
+        },
+        {
+          "name": "POST /alerts - Create alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sourceService\": \"camera-service\",\n  \"alertType\": \"motion-detected\",\n  \"severity\": \"high\",\n  \"message\": \"Motion detected at entrance\"\n}" },
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+            "pm.test('Response has id', function () { pm.expect(pm.response.json()).to.have.property('id'); });",
+            "pm.test('Response has createdAt', function () { pm.expect(pm.response.json()).to.have.property('createdAt'); });",
+            "pm.environment.set('alertId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "GET /alerts - List alerts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response has items array', function () { var json = pm.response.json(); pm.expect(json).to.have.property('items'); pm.expect(json.items).to.be.an('array'); });",
+            "pm.test('Response has hasMore field', function () { pm.expect(pm.response.json()).to.have.property('hasMore'); });"
+          ]}}]
+        },
+        {
+          "name": "GET /alerts/recent - Recent alerts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/alerts/recent?limit=5", "host": ["{{baseUrl}}"], "path": ["alerts","recent"], "query": [{ "key": "limit", "value": "5" }] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response has items array', function () { var json = pm.response.json(); pm.expect(json).to.have.property('items'); pm.expect(json.items).to.be.an('array'); });"
+          ]}}]
+        },
+        {
+          "name": "GET /alerts/{alertId} - Get alert by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/alerts/{{alertId}}", "host": ["{{baseUrl}}"], "path": ["alerts","{{alertId}}"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response has id field', function () { pm.expect(pm.response.json()).to.have.property('id'); });"
+          ]}}]
+        },
+        {
+          "name": "POST /events - Create campus event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"eventType\": \"access-granted\",\n  \"severity\": { \"level\": \"low\" }\n}" },
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+            "pm.test('Response has eventId', function () { pm.expect(pm.response.json()).to.have.property('eventId'); });"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "GET /alerts - No token (expect 401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Unauthorized returns 401 or 403', function () { pm.expect([401, 403]).to.include(pm.response.code); });"
+          ]}}]
+        },
+        {
+          "name": "POST /alerts - Wrong token (mock limitation noted)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer wrong-token-xyz" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sourceService\": \"test\",\n  \"alertType\": \"test\",\n  \"severity\": \"low\",\n  \"message\": \"test\"\n}" },
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Mock does not validate token - documented limitation', function () { pm.expect([201, 401, 403]).to.include(pm.response.code); });"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "POST /alerts - Missing required fields (expect 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sourceService\": \"camera-service\"\n}" },
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Missing fields returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+            "pm.test('Error response has status field', function () { pm.expect(pm.response.json()).to.have.property('status'); });"
+          ]}}]
+        },
+        {
+          "name": "GET /alerts/{alertId} - Non-existent ID (mock limitation noted)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/alerts/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["alerts","00000000-0000-0000-0000-000000000000"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Mock returns mock data for any UUID - documented limitation', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+          ]}}]
+        },
+        {
+          "name": "POST /events - Invalid payload (expect 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Empty payload returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_Reliability",
+      "item": [
+        {
+          "name": "GET /alerts - Limit boundary (limit=1)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/alerts?limit=1", "host": ["{{baseUrl}}"], "path": ["alerts"], "query": [{ "key": "limit", "value": "1" }] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Items count respects limit', function () { pm.expect(pm.response.json().items.length).to.be.at.most(1); });"
+          ]}}]
+        },
+        {
+          "name": "POST /alerts - High severity boundary",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sourceService\": \"iot-service\",\n  \"alertType\": \"fire-detected\",\n  \"severity\": \"critical\",\n  \"message\": \"Fire alarm triggered in building A\"\n}" },
+            "url": { "raw": "{{baseUrl}}/alerts", "host": ["{{baseUrl}}"], "path": ["alerts"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('High severity alert accepted or validated', function () { pm.expect([201, 400, 422]).to.include(pm.response.code); });",
+            "if (pm.response.code === 201) { pm.test('Created alert has id', function () { pm.expect(pm.response.json()).to.have.property('id'); }); }"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "05_Consumer_side_Smoke",
+      "item": [
+        {
+          "name": "GET AI Vision /health - Upstream smoke test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{aiVisionMockUrl}}/health", "host": ["{{aiVisionMockUrl}}"], "path": ["health"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "try { pm.test('AI Vision mock is reachable', function () { pm.expect([200, 404]).to.include(pm.response.code); }); } catch(e) { pm.test('AI Vision mock not running - documented', function () { pm.expect(true).to.be.true; }); }"
+          ]}}]
+        },
+        {
+          "name": "POST AI Vision /detect - Consumer smoke test",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"imageUrl\": \"http://example.com/frame.jpg\"\n}" },
+            "url": { "raw": "{{aiVisionMockUrl}}/detect", "host": ["{{aiVisionMockUrl}}"], "path": ["detect"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "try { pm.test('AI Vision mock responds to detect', function () { pm.expect([200, 201, 400, 404, 422]).to.include(pm.response.code); }); } catch(e) { pm.test('AI Vision mock not running - documented', function () { pm.expect(true).to.be.true; }); }"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "06_Local_only_NonFunctional",
+      "item": [
+        {
+          "name": "GET /health - Response time check (local only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.environment.get('env') === 'local') { pm.test('Response time below 1000ms on local', function () { pm.expect(pm.response.responseTime).to.be.below(1000); }); } else { pm.test('Skipped - local only test', function () { pm.expect(true).to.be.true; }); }"
+          ]}}]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,11 @@
+
+[4mc:/Users/Admin/lab-3-kien2510/contracts/notify.openapi.yaml[24m
+  24:9   [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./health.get
+  37:10  [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./alerts.post
+  65:9   [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./alerts.get
+  86:9   [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./alerts/recent.get
+  116:9  [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./alerts/{alertId}.get
+ 142:10  [33mwarning[39m  operation-description  Operation "description" must be present and non-empty string.  paths./events.post
+
+[33m[1m✖ 6 problems (0 errors, 6 warnings, 0 infos, 0 hints)[22m[39m
+[33m[1m[22m[39m
