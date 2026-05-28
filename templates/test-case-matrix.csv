@@ -1,6 +1,17 @@
-ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+﻿test_name,endpoint,method,input,expected_status,test_type
+GET /health - Health check,/health,GET,,200,Functional
+POST /alerts - Create alert,/alerts,POST,valid alert body,201,Functional
+GET /alerts - List alerts,/alerts,GET,,200,Functional
+GET /alerts/recent - Recent alerts,/alerts/recent,GET,limit=5,200,Functional
+GET /alerts/{alertId} - Get alert by ID,/alerts/{alertId},GET,valid UUID,200,Functional
+POST /events - Create campus event,/events,POST,valid event body,201,Functional
+GET /alerts - No token,/alerts,GET,no Authorization header,401,Auth
+POST /alerts - Wrong token,/alerts,POST,wrong token,401,Auth
+POST /alerts - Missing required fields,/alerts,POST,missing severity/message,400,Negative
+GET /alerts - Non-existent ID,/alerts/{alertId},GET,all-zero UUID,404,Negative
+POST /events - Invalid payload,/events,POST,empty body,400,Negative
+GET /alerts - Limit boundary,/alerts,GET,limit=1,200,Boundary
+POST /alerts - High severity boundary,/alerts,POST,severity=critical,201,Boundary
+GET AI Vision /health - Upstream smoke,/health,GET,,200,Consumer-side Smoke
+POST AI Vision /detect - Consumer smoke,/detect,POST,imageUrl,200/400,Consumer-side Smoke
+GET /health - Response time (local only),/health,GET,,200,NonFunctional

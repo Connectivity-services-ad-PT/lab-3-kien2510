@@ -1,57 +1,27 @@
-# Consumer–Provider Handshake
+﻿# Consumer-Provider Handshake - team-notify
 
-## Thông tin chung
+## Provider
+- **Service:** Notification Service
+- **Team:** Nhóm 7A
+- **Contract:** contracts/notify.openapi.yaml
 
-- Lab: FIT4110 Lab 03
-- Ngày:
-- Provider team:
-- Consumer team:
-- Provider service:
-- Consumer service:
+## Consumer
+- **Service:** AI Vision Service
+- **Contract:** contracts/ai-vision.openapi.yaml
+- **Mock URL:** http://localhost:4011
 
-## Contract
+## Endpoints consumed
+| Endpoint | Method | Purpose |
+|---|---|---|
+| /health | GET | Check AI Vision availability |
+| /detect | POST | Trigger image detection |
 
-- Contract file:
-- Mock base URL:
-- Auth method:
-- Endpoint được test:
+## Handshake Agreement
+- Consumer tested against AI Vision mock at port 4011
+- Provider contract lint passed with 0 errors
+- Consumer-side smoke tests pass on mock environment
+- Known: AI Vision /detect returns 400 for minimal payload - acceptable on mock
 
-## Smoke test
-
-### Request
-
-```http
-METHOD /path
-Authorization: Bearer <token>
-Content-Type: application/json
-```
-
-```json
-{
-}
-```
-
-### Expected response
-
-```json
-{
-}
-```
-
-## Kết quả
-
-- [ ] Consumer gọi mock thành công.
-- [ ] Consumer parse được field cần dùng.
-- [ ] Consumer hiểu lỗi 4xx/5xx provider trả về.
-- [ ] Có Newman report hoặc screenshot.
-
-## Ghi chú thay đổi hợp đồng
-
-| Nội dung | Trước | Sau | Người đồng ý |
-|---|---|---|---|
-| | | | |
-
-## Xác nhận
-
-- Provider representative:
-- Consumer representative:
+## Sign-off
+- Provider: Nguyễn Trung Kiên - team-notify
+- Date: 2026-05-28

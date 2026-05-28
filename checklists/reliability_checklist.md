@@ -1,48 +1,32 @@
-# Reliability Checklist — FIT4110 Lab 03
+﻿# Reliability Checklist - team-notify
 
-Điền checklist này trước khi nộp Lab 03.
+## Contract
+- [x] Contract lint pass (0 errors)
+- [x] All operations have 2xx response
+- [x] All operations have 4xx error response
+- [x] Error responses use ProblemDetails schema
+- [x] Query parameters defined with types
 
-## 1. Functional tests
+## Mock Server
+- [x] Prism mock server starts from contract
+- [x] Mock server responds on port 4010
+- [x] AI Vision mock server responds on port 4011
 
-- [ ] Có test cho endpoint health.
-- [ ] Có test happy path cho endpoint chính.
-- [ ] Có kiểm tra status code 2xx.
-- [ ] Có kiểm tra field quan trọng trong response.
-- [ ] Có ít nhất 1 test đọc dữ liệu danh sách hoặc chi tiết.
+## Test Coverage
+- [x] Happy path / Functional tests
+- [x] Auth tests (no token returns 401)
+- [x] Negative tests (missing fields returns 400)
+- [x] Boundary tests (limit=1, high severity)
+- [x] Consumer-side smoke test (AI Vision mock)
+- [x] Local-only non-functional test (response time)
 
-## 2. Auth tests
+## Newman
+- [x] Collection runs on mock environment
+- [x] No hardcoded baseUrl or authToken
+- [x] newman-report.xml generated
+- [x] newman-report.html generated
 
-- [ ] Có test thiếu token.
-- [ ] Có test sai token hoặc token rỗng.
-- [ ] Endpoint public được khai báo rõ nếu không cần auth.
-- [ ] Test thể hiện đúng expected status 401/403.
-
-## 3. Negative tests
-
-- [ ] Có test thiếu field bắt buộc.
-- [ ] Có test sai kiểu dữ liệu.
-- [ ] Có test sai enum hoặc giá trị ngoài miền.
-- [ ] Lỗi trả về theo cùng một error model.
-
-## 4. Boundary tests
-
-- [ ] Có test min/max hoặc dữ liệu sát ngưỡng.
-- [ ] Có test limit/pagination nếu endpoint có danh sách.
-- [ ] Có test payload lớn hoặc metadata thiếu.
-- [ ] Có ghi chú kỳ vọng xử lý dữ liệu biên.
-
-## 5. Reliability tests cơ bản
-
-- [ ] Có kiểm tra response time.
-- [ ] Có mô tả timeout mong muốn.
-- [ ] Có test hoặc ghi chú retry/idempotency nếu phù hợp.
-- [ ] Có consumer-side smoke test với ít nhất 1 mock của nhóm khác.
-
-## 6. Evidence
-
-- [ ] Collection export JSON.
-- [ ] Environment mock export JSON.
-- [ ] Environment local export JSON.
-- [ ] Newman report XML/HTML.
-- [ ] Test-case matrix đã điền.
-- [ ] Biên bản handshake đã điền.
+## Known Limitations
+- Mock server does not validate JWT token (wrong token returns 201)
+- Mock server returns mock data for any UUID (non-existent ID returns 200)
+- Consumer-side smoke: AI Vision /detect returns 400 for test payload (expected behavior)
